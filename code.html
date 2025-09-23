@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Upload Foto Elegan</title>
+    <style>
+        body {
+            background: linear-gradient(to bottom, #FFFFFF, #FFB6C1); /* Gradient putih ke merah muda */
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+            min-height: 100vh;
+            transition: all 0.3s ease; /* Transisi halus untuk perubahan */
+        }
+        
+        #opening {
+            display: block;
+            padding: 100px 20px;
+            animation: fadeIn 1s ease-in; /* Animasi masuk */
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        #menu-section {
+            display: none;
+            padding: 40px 20px;
+        }
+        
+        h1, h2, h3 {
+            color: #8B0000; /* Merah tua untuk judul */
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1); /* Shadow halus */
+        }
+        
+        button {
+            background: linear-gradient(to right, #FF0000, #DC143C); /* Gradient merah */
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 8px; /* Rounded corners */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* Shadow untuk kedalaman */
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px); /* Efek hover angkat */
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+        
+        input[type="file"] {
+            margin: 15px;
+            padding: 10px;
+            border: 2px dashed #FF0000; /* Border dashed merah */
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.8);
+        }
+        
+        #photo-preview {
+            margin: 20px;
+            padding: 20px;
+            border: 2px solid #FFB6C1;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        #photo-preview img {
+            max-width: 250px;
+            max-height: 250px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        #photo-gallery {
+            margin-top: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .photo-item {
+            display: inline-block;
+            margin: 15px;
+            border: 3px solid #FF0000;
+            padding: 10px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+            transition: transform 0.3s;
+        }
+        
+        .photo-item:hover {
+            transform: scale(1.05); /* Efek zoom hover */
+        }
+        
+        .photo-item img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        
+        .delete-btn {
+            background: linear-gradient(to right, #DC143C, #B22222);
+            font-size: 14px;
+            padding: 8px 12px;
+            margin-top: 5px;
+            border-radius: 5px;
+        }
+        
+        .delete-btn:hover {
+            background: linear-gradient(to right, #B22222, #8B0000);
+        }
+        
+        p {
+            font-size: 18px;
+            color: #333;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Halaman Awal (Open) -->
+    <div id="opening">
+        <h1>Open</h1>
+        <p>Selamat datang di website upload foto! Tekan tombol Menu untuk memulai petualangan foto Anda.</p>
+        <button onclick="showMenu()">Menu</button>
+    </div>
+    
+    <!-- Bagian Menu (Upload Foto) -->
+    <div id="menu-section">
+        <h2>Upload dan Kelola Foto</h2>
+        <p>Pilih foto dari perangkat Anda, preview, lalu simpan atau hapus.</p>
+        <input type="file" id="photoInput" accept="image/*" onchange="previewPhoto(event)">
+        <br>
+        <button onclick="savePhoto()">Simpan Foto</button>
+        <button onclick="clearAllPhotos()">Hapus Semua Foto</button>
+        
+        <div id="photo-preview">
+            <!-- Preview foto akan muncul di sini -->
+        </div>
+        
+        <div id="photo-gallery">
+            <!-- Galeri foto akan muncul di sini -->
+        </div>
+    </div>
+
+    <script>
+        let currentPhoto = null; // Variabel untuk preview foto sementara
+        
+        function showMenu() {
+            document.getElementById('opening').style.display = 'none';
+            document.getElementById('menu-section').style.display = 'block';
+            loadSavedPhotos(); // Load foto yang sudah disimpan saat menu muncul
+        }
+        
+        function previewPhoto(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentPhoto = e.target.result;
+                    document.getElementById('photo-preview').innerHTML = 
+                        '<img src="' + currentPhoto + '" alt="Preview Foto" style="max-width: 250px; max-height: 250px;">' +
+                        '<p>Preview: Foto siap disimpan!</p>';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        function savePhoto() {
+            if (!currentPhoto) {
+                alert('Silakan pilih foto terlebih dahulu!');
+                return;
+            }
+            
+            // Simpan ke localStorage sebagai array base64 images
+            let savedPhotos = JSON.parse(localStorage.getItem('savedPhotos') || '[]');
+            savedPhotos.push(currentPhoto);
+            localStorage.setItem('savedPhotos', JSON.stringify(savedPhotos));
+            
+            alert('Foto berhasil disimpan!');
+            // Reset preview
+            currentPhoto = null;
+            document.getElementById('photoInput').value = '';
+            document.getElementById('photo-preview').innerHTML = '<p>Tunggu foto baru untuk preview...</p>';
+            loadSavedPhotos(); // Refresh galeri
+        }
+        
+        function loadSavedPhotos() {
+            let savedPhotos = JSON.parse(localStorage.getItem('savedPhotos') || '[]');
+            const gallery = document.getElementById('photo-gallery');
+            gallery.innerHTML = '<h3>Galeri Foto Tersimpan:</h3>';
+            
+            if (savedPhotos.length === 0) {
+                gallery.innerHTML += '<p>Belum ada foto yang disimpan. Upload sekarang!</p>';
+                return;
+            }
+            
+            savedPhotos.forEach((photo, index) => {
+                const item = document.createElement('div');
+                item.className = 'photo-item';
+                item.innerHTML = `
+                    <img src="${photo}" alt="Foto Tersimpan ${index + 1}">
+                    <br>
+                    <button class="delete-btn" onclick="deletePhoto(${index})">Hapus Foto Ini</button>
+                `;
+                gallery.appendChild(item);
+            });
+        }
+        
+        function deletePhoto(index) {
+            let savedPhotos = JSON.parse(localStorage.getItem('savedPhotos') || '[]');
+            savedPhotos.splice(index, 1);
+            localStorage.setItem('savedPhotos', JSON.stringify(savedPhotos));
+            loadSavedPhotos(); // Refresh galeri
+            alert('Foto dihapus!');
+        }
+        
+        function clearAllPhotos() {
+            if (confirm('Apakah Anda yakin ingin menghapus semua foto?')) {
+                localStorage.removeItem('savedPhotos');
+                loadSavedPhotos();
+                alert('Semua foto dihapus!');
+            }
+        }
+    </script>
+</body>
+</html>
